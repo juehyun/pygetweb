@@ -105,6 +105,25 @@ def create_browser(path_chrome_drive, headless_mode):
     #ch.implicitly_wait(3) # An implicit wait tells WebDriver to poll the DOM for a certain amount of time when trying to find any element (or elements) not immediately available. The default setting is 0. Once set, the implicit wait is set for the life of the WebDriver object.
 
     return(ch)
+
+def download_files(list_urls, list_filenames):
+    # get files using Asyncronous HTTP
+    rs = requests.Session()
+    reqs = ( grequests.get(u, session=rs) for u in list_urls )
+    resps = grequests.map(reqs)
+
+    # write to disk
+    for i, p in enumerate(resps):
+        # if file not exist -> download
+        if (not os.path.exists(list_filenames[i])):
+            with open(list_filenames[i], 'wb') as f:
+                f.write(p.content)
+                f.close()
+            print(f'\t[{i:03}] download : {list_filenames[i]}')
+        else:
+            print(f'\tskip existing file : {list_filenames[i]}')
+            # os.remove(list_fnm[i])
+
 def is_download_finished(folder):
     """
     check previous chrome downloading is completed
